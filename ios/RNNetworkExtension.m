@@ -69,7 +69,7 @@ RCT_EXPORT_MODULE()
   return @[@"VPNStatus", @"VPNStartFail"];
 }
 
-RCT_EXPORT_METHOD(connect, resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(networkExtensionConnect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self installProfile:resolve rejecter:reject];
 
@@ -80,7 +80,7 @@ RCT_EXPORT_METHOD(connect, resolver:(RCTPromiseResolveBlock)resolve rejecter:(RC
              object:nil];
 }
 
-RCT_EXPORT_METHOD(disconnect)
+RCT_EXPORT_METHOD(networkExtensionDisconnect)
 {
     [_vpnManager.connection stopVPNTunnel];
 }

@@ -9,11 +9,11 @@ const eventEmitter = new NativeEventEmitter(RNNetworkExtension);
 
 export default {
     connect() {
-        return RNNetworkExtension.connect();
+        return RNNetworkExtension.networkExtensionConnect();
     },
 
     disconnect() {
-        return RNNetworkExtension.disconnect();
+        return RNNetworkExtension.networkExtensionDisconnect();
     },
 
     addEventListener(event, listener) {
