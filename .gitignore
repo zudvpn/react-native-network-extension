@@ -3,6 +3,10 @@
 #
 .DS_Store
 
+package-lock.json
+
+.vscode/
+
 # node.js
 #
 node_modules/
