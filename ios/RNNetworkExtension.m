@@ -69,7 +69,7 @@ RCT_EXPORT_MODULE()
   return @[@"VPNStatus", @"VPNStartFail"];
 }
 
-RCT_EXPORT_METHOD(connect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(connect, resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     [self installProfile:resolve rejecter:reject];
 
