@@ -4,16 +4,16 @@ import {
     NativeEventEmitter    
  } from 'react-native';
 
-const { RNNetworkExtension } = NativeModules;
-const eventEmitter = new NativeEventEmitter(RNNetworkExtension);
+const NativeRNNetworkExtension = NativeModules.RNNetworkExtension;
+const eventEmitter = new NativeEventEmitter(NativeRNNetworkExtension);
 
 export default {
     connect() {
-        return RNNetworkExtension.networkExtensionConnect();
+        return NativeRNNetworkExtension.networkExtensionConnect();
     },
 
     disconnect() {
-        return RNNetworkExtension.networkExtensionDisconnect();
+        return NativeRNNetworkExtension.networkExtensionDisconnect();
     },
 
     addEventListener(event, listener) {
