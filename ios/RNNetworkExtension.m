@@ -115,10 +115,10 @@ RCT_EXPORT_METHOD(networkExtensionDisconnect)
                 reject(@"vpn_save_error", @"VPN Manager save error", error);
                 return;
             }
+
+            resolve(@YES);
         }];
     }];
-
-    resolve(@YES);
 }
 
 - (void)vpnConfigDidChange:(NSNotification *)notification
