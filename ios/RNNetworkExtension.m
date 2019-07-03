@@ -85,13 +85,13 @@ RCT_EXPORT_METHOD(disconnect)
     [_vpnManager.connection stopVPNTunnel];
 }
 
--(void)installProfile:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+-(void)installProfile:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     self.vpnManager = [NEVPNManager sharedManager];
 
     [_vpnManager loadFromPreferencesWithCompletionHandler:^(NSError *error) {
         if (error) {
-            reject(@"vpn_load_error", @"VPN Manager load error", error)
+            reject(@"vpn_load_error", @"VPN Manager load error", error);
             return;
         }
 
@@ -150,18 +150,18 @@ RCT_EXPORT_METHOD(disconnect)
 
     switch (status) {
         case NEVPNStatusConnected:
-            statusDescription = @"Connected"
+            statusDescription = @"Connected";
             break;
         case NEVPNStatusInvalid:
         case NEVPNStatusDisconnected:
-            statusDescription = @"Disconnected"
+            statusDescription = @"Disconnected";
             break;
         case NEVPNStatusConnecting:
         case NEVPNStatusReasserting:
-            statusDescription = @"Connecting"
+            statusDescription = @"Connecting";
             break;
         case NEVPNStatusDisconnecting:
-            statusDescription = @"Disconnecting"
+            statusDescription = @"Disconnecting";
             break;
         default:
             break;
