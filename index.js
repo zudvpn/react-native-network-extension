@@ -1,6 +1,3 @@
+import RNNetworkExtension from './RNNetworkExtension'
 
-import { NativeModules } from 'react-native';
-
-const { RNNetworkExtension } = NativeModules;
-
-export default RNNetworkExtension;
+export default RNNetworkExtension

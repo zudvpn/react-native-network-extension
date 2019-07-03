@@ -43,6 +43,23 @@
   - Add `new RNNetworkExtensionPackage()` to the `List<IReactPackage>` returned by the `Packages` method
 
 
+## Setup `AppDelegate.m`
+	#import "AppDelegate.h"
+
+	// Other imports...
+
+	#import <RNNetworkExtension/RNNetworkExtension.h>
+
+	@implementation AppDelegate
+
+	- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+	{
+		// Other codes...
+		[RNNetworkExtension bootstrap];
+	
+		return YES;
+	}
+
 ## Usage
 ```javascript
 import RNNetworkExtension from 'react-native-network-extension';
