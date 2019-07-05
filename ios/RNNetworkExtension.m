@@ -49,7 +49,7 @@ RCT_EXPORT_MODULE()
     return instance;
 }
 
-+ (void)setVpnManager:(NEVPNManager *)vpnManager
+- (void)setVpnManager:(NEVPNManager *)vpnManager
 {
     self.vpnManager = vpnManager;
 }
@@ -69,9 +69,9 @@ RCT_EXPORT_MODULE()
   return @[@"VPNStatus", @"VPNStartFail"];
 }
 
-RCT_EXPORT_METHOD(networkExtensionConnect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(connect:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self installProfile:resolve rejecter:reject];
+    [self installProfile:args resolver:resolve rejecter:reject];
 
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self
@@ -80,15 +80,13 @@ RCT_EXPORT_METHOD(networkExtensionConnect:(RCTPromiseResolveBlock)resolve reject
              object:nil];
 }
 
-RCT_EXPORT_METHOD(networkExtensionDisconnect)
+RCT_EXPORT_METHOD(disconnect)
 {
     [_vpnManager.connection stopVPNTunnel];
 }
 
--(void)installProfile:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+-(void)installProfile:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
-    self.vpnManager = [NEVPNManager sharedManager];
-
     [_vpnManager loadFromPreferencesWithCompletionHandler:^(NSError *error) {
         if (error) {
             reject(@"vpn_load_error", @"VPN Manager load error", error);
@@ -102,6 +100,14 @@ RCT_EXPORT_METHOD(networkExtensionDisconnect)
         } else {
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
+
+        p.serverAddress = args[@"IPAddress"];
+        p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
+        p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0]
+        p.identityDataPassword = args[@"clientCertKey"];
+
+        p.localIdentifier = args[@"IPAddress"];
+        p.remoteIdentifier = args[@"IPAddress"];
 
         p.useExtendedAuthentication = YES;
         p.disconnectOnSleep = NO;
@@ -125,6 +131,7 @@ RCT_EXPORT_METHOD(networkExtensionDisconnect)
 {
     // TODO: Save configuration failed
     [self startConnecting];
+
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NEVPNConfigurationChangeNotification
                                                   object:nil];
@@ -134,6 +141,7 @@ RCT_EXPORT_METHOD(networkExtensionDisconnect)
 {
     NSError *startError;
     [_vpnManager.connection startVPNTunnelAndReturnError:&startError];
+
     if (startError) {
         if (hasListeners) {
             [self sendEventWithName:@"VPNStartFail" body:startError.localizedDescription];
