@@ -10,5 +10,7 @@
 
 @interface RNNetworkExtension : RCTEventEmitter <RCTBridgeModule>
 
++ (void)bootstrap;
+
 @end
   
