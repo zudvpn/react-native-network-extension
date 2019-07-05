@@ -103,7 +103,7 @@ RCT_EXPORT_METHOD(disconnect)
 
         p.serverAddress = args[@"IPAddress"];
         p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
-        p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0]
+        p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         p.identityDataPassword = args[@"clientCertKey"];
 
         p.localIdentifier = args[@"IPAddress"];
