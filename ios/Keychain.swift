@@ -5,8 +5,8 @@ class Keychain {
 	func persistentRef(key: String) -> NSData? {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
-			kSecAttrGeneric: key,
-			kSecAttrAccount: key,
+			kSecAttrGeneric: key as AnyObject,
+			kSecAttrAccount: key as AnyObject,
 			kSecAttrAccessible: kSecAttrAccessibleAlways,
 			kSecMatchLimit: kSecMatchLimitOne,
 			kSecAttrService: Bundle.mainBundle().bundleIdentifier!,
@@ -25,7 +25,7 @@ class Keychain {
 	func set(key: String, value: String) {
 		
 		let query: [NSObject: AnyObject] = [
-			kSecValueData: value.dataUsingEncoding(NSUTF8StringEncoding)!,
+			kSecValueData: value.dataUsingEncoding(NSUTF8StringEncoding)! as AnyObject,
 			kSecClass: kSecClassGenericPassword,
 			kSecAttrGeneric: key,
 			kSecAttrAccount: key,
@@ -33,7 +33,7 @@ class Keychain {
 			kSecAttrService: Bundle.mainBundle().bundleIdentifier!
 		]
 
-		clear(key)
+		clear(key: key)
 		SecItemAdd(query as CFDictionary, nil)
 	}
 
