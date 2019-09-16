@@ -1,5 +1,6 @@
 
 #import "RNNetworkExtension.h"
+#import "RNNetworkExtension-Swift.h"
 
 #import <NetworkExtension/NEVPNManager.h>
 #import <NetworkExtension/NEVPNConnection.h>
@@ -97,38 +98,43 @@ RCT_EXPORT_METHOD(disconnect)
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
 
-        p.serverAddress = args[@"IPAddress"];
+        Keychain *keychain = [Keychain new];
+        [keychain set:@"vpnpassword" value:args[@"password"]];
+
+        p.serverAddress = args[@"domain"];
         p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
-        p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
-        p.identityDataPassword = args[@"clientCertKey"];
+        p.username = args[@"username"];
+        p.passwordReference = [keychain persistentRef:args[@"password"]];
+        // p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
+        // p.identityDataPassword = args[@"clientCertKey"];
 
-        p.childSecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
-        p.childSecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
-        p.childSecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
-        p.childSecurityAssociationParameters.lifetimeMinutes = 20;
+        // p.childSecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        // p.childSecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        // p.childSecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        // p.childSecurityAssociationParameters.lifetimeMinutes = 20;
 
-        p.IKESecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
-        p.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
-        p.IKESecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
-        p.IKESecurityAssociationParameters.lifetimeMinutes = 20;
+        // p.IKESecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        // p.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        // p.IKESecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        // p.IKESecurityAssociationParameters.lifetimeMinutes = 20;
         
         p.disableMOBIKE = NO;
         p.disableRedirect = YES;
         p.enableRevocationCheck = NO;
         p.enablePFS = YES;
         p.useConfigurationAttributeInternalIPSubnet = NO;
-        p.certificateType = NEVPNIKEv2CertificateTypeECDSA256;
-        p.serverCertificateCommonName = args[@"IPAddress"];
-        p.serverCertificateIssuerCommonName = args[@"IPAddress"];
+        // p.certificateType = NEVPNIKEv2CertificateTypeECDSA256;
+        // p.serverCertificateCommonName = args[@"IPAddress"];
+        // p.serverCertificateIssuerCommonName = args[@"IPAddress"];
 
-        p.localIdentifier = args[@"IPAddress"];
-        p.remoteIdentifier = args[@"IPAddress"];
+        p.localIdentifier = args[@"domain"];
+        p.remoteIdentifier = args[@"domain"];
 
-        p.useExtendedAuthentication = NO;
+        p.useExtendedAuthentication = YES;
         p.disconnectOnSleep = NO;
 
         _vpnManager.protocolConfiguration = p;
-        _vpnManager.localizedDescription = @"AnyVPN";
+        _vpnManager.localizedDescription = args[@"domain"];
         _vpnManager.enabled = YES;
 
         [_vpnManager saveToPreferencesWithCompletionHandler:^(NSError *error) {

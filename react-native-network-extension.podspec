@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
     s.platform       = :ios, '9.0'
   
     s.preserve_paths = '*.js'
-    s.source_files   = 'ios/*.{h,m}'
+    s.source_files   = 'ios/*.{h,m}', 'ios/*.swift'
   
     s.dependency 'React'
   end

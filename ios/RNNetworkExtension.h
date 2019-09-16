@@ -7,6 +7,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
+@class Keychain;
 
 @interface RNNetworkExtension : RCTEventEmitter <RCTBridgeModule>
 
