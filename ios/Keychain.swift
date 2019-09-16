@@ -1,20 +1,20 @@
 import Foundation
 import Security
 
-@objc class Keychain {
-	@objc func persistentRef(key: String) -> NSData? {
+class Keychain {
+	func persistentRef(key: String) -> NSData? {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
 			kSecAttrGeneric: key,
 			kSecAttrAccount: key,
 			kSecAttrAccessible: kSecAttrAccessibleAlways,
 			kSecMatchLimit: kSecMatchLimitOne,
-			kSecAttrService: NSBundle.mainBundle().bundleIdentifier!,
+			kSecAttrService: Bundle.mainBundle().bundleIdentifier!,
 			kSecReturnPersistentRef: kCFBooleanTrue
 		]
 		
 		var secItem: AnyObject?
-		let result = SecItemCopyMatching(query, &secItem)
+		let result = SecItemCopyMatching(query as CFDictionary, &secItem)
 		if result != errSecSuccess {
 			return nil
 		}
@@ -22,7 +22,7 @@ import Security
 		return secItem as? NSData
 	}
 
-	@objc func set(key: String, value: String) {
+	func set(key: String, value: String) {
 		
 		let query: [NSObject: AnyObject] = [
 			kSecValueData: value.dataUsingEncoding(NSUTF8StringEncoding)!,
@@ -30,18 +30,18 @@ import Security
 			kSecAttrGeneric: key,
 			kSecAttrAccount: key,
 			kSecAttrAccessible: kSecAttrAccessibleAlways,
-			kSecAttrService: NSBundle.mainBundle().bundleIdentifier!
+			kSecAttrService: Bundle.mainBundle().bundleIdentifier!
 		]
 
 		clear(key)
-		SecItemAdd(query as CFDictionaryRef, nil)
+		SecItemAdd(query as CFDictionary, nil)
 	}
 
-	@objc func clear(key: String) {
+	func clear(key: String) {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
-			kSecAttrAccount: key
+			kSecAttrAccount: key as AnyObject
 		]
-		SecItemDelete(query as CFDictionaryRef)
+		SecItemDelete(query as CFDictionary)
 	}
 }

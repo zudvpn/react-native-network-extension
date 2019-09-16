@@ -1,6 +1,6 @@
 {
   "name": "react-native-network-extension",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "React Native Network Extension",
   "repository": "https://github.com/miniyarov/react-native-network-extension",
   "main": "index.js",
