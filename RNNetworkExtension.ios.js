@@ -17,6 +17,8 @@ export default {
     },
 
     addEventListener(event, listener) {
+        console.log('adding event: ', event)
+
         if (event === 'status') {
             return eventEmitter.addListener('VPNStatus', listener);
         } else if (event === 'fail') {
@@ -30,6 +32,8 @@ export default {
     },
 
     removeEventListener(event, listener) {
+        console.log('removing event: ', event)
+
         if (event === 'status') {
             return eventEmitter.removeListener('VPNStatus', listener);
         } else if (event === 'fail') {

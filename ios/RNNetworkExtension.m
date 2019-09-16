@@ -4,10 +4,11 @@
 #import <NetworkExtension/NEVPNManager.h>
 #import <NetworkExtension/NEVPNConnection.h>
 #import <NetworkExtension/NEVPNProtocolIKEv2.h>
+#import <React/RCTBridgeModule.h>
 
 @interface RNNetworkExtension()
 
-@property (strong, nonatomic) NEVPNManager *vpnManager;
+@property (strong, nonatomic, nonnull) NEVPNManager *vpnManager;
 
 @end
 
@@ -23,35 +24,22 @@ RCT_EXPORT_MODULE()
     return dispatch_get_main_queue();
 }
 
-+ (void)bootstrap
+-(void)bootstrap
 {
-    NEVPNManager *vpnManager = [NEVPNManager sharedManager];
-
-    [[RNNetworkExtension sharedInstance] setVpnManager:vpnManager];
+    self.vpnManager = [NEVPNManager sharedManager];
 
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+
+    [nc removeObserver:self
+                  name:NEVPNStatusDidChangeNotification
+                object:nil];
+
     [nc addObserver:self
            selector:@selector(vpnStatusDidChange:)
                name:NEVPNStatusDidChangeNotification
              object:nil];
-}
-
-+ (instancetype)sharedInstance
-{
-    static RNNetworkExtension *instance = nil;
-    static dispatch_once_t onceToken = 0;
-    dispatch_once(&onceToken, ^{
-        if (instance == nil) {
-            instance = [[RNNetworkExtension alloc] init];
-        }
-    });
-
-    return instance;
-}
-
-- (void)setVpnManager:(NEVPNManager *)vpnManager
-{
-    self.vpnManager = vpnManager;
+    
+    NSLog(@"RNNetworkExtension bootstrapped");
 }
 
 - (void)startObserving
@@ -71,6 +59,9 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(connect:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
+    [self bootstrap];
+
+    NSLog(@"connect triggered");
     [self installProfile:args resolver:resolve rejecter:reject];
 
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -87,9 +78,14 @@ RCT_EXPORT_METHOD(disconnect)
 
 -(void)installProfile:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
+    NSLog(@"install profile");
+    
     [_vpnManager loadFromPreferencesWithCompletionHandler:^(NSError *error) {
         if (error) {
             reject(@"vpn_load_error", @"VPN Manager load error", error);
+            
+            NSLog(@"vpn load error: %@", error.localizedDescription);
+            
             return;
         }
 
@@ -106,10 +102,29 @@ RCT_EXPORT_METHOD(disconnect)
         p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         p.identityDataPassword = args[@"clientCertKey"];
 
+        p.childSecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        p.childSecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        p.childSecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        p.childSecurityAssociationParameters.lifetimeMinutes = 20;
+
+        p.IKESecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        p.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        p.IKESecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        p.IKESecurityAssociationParameters.lifetimeMinutes = 20;
+        
+        p.disableMOBIKE = NO;
+        p.disableRedirect = YES;
+        p.enableRevocationCheck = NO;
+        p.enablePFS = YES;
+        p.useConfigurationAttributeInternalIPSubnet = NO;
+        p.certificateType = NEVPNIKEv2CertificateTypeECDSA256;
+        p.serverCertificateCommonName = args[@"IPAddress"];
+        p.serverCertificateIssuerCommonName = args[@"IPAddress"];
+
         p.localIdentifier = args[@"IPAddress"];
         p.remoteIdentifier = args[@"IPAddress"];
 
-        p.useExtendedAuthentication = YES;
+        p.useExtendedAuthentication = NO;
         p.disconnectOnSleep = NO;
 
         _vpnManager.protocolConfiguration = p;
@@ -119,6 +134,9 @@ RCT_EXPORT_METHOD(disconnect)
         [_vpnManager saveToPreferencesWithCompletionHandler:^(NSError *error) {
             if (error) {
                 reject(@"vpn_save_error", @"VPN Manager save error", error);
+                
+                NSLog(@"vpn save error: %@", error.localizedDescription);
+                
                 return;
             }
 
@@ -139,15 +157,17 @@ RCT_EXPORT_METHOD(disconnect)
 
 - (void)startConnecting
 {
-    NSError *startError;
-    [_vpnManager.connection startVPNTunnelAndReturnError:&startError];
+    NSLog(@"start connecting");
+    
+    NSError *error;
+    [_vpnManager.connection startVPNTunnelAndReturnError:&error];
 
-    if (startError) {
+    if (error) {
         if (hasListeners) {
-            [self sendEventWithName:@"VPNStartFail" body:startError.localizedDescription];
+            [self sendEventWithName:@"VPNStartFail" body:error.localizedDescription];
         }
         
-        NSLog(@"Start VPN failed: [%@]", startError.localizedDescription);
+        NSLog(@"Start VPN failed: [%@]", error.localizedDescription);
     }
 }
 
@@ -174,9 +194,11 @@ RCT_EXPORT_METHOD(disconnect)
         default:
             break;
     }
+    
+    NSLog(@"VPN status changed %@", statusDescription);
 
     if (hasListeners) {
-        [self sendEventWithName:@"VPNStatus" body:statusDescription];
+        [self sendEventWithName:@"VPNStatus" body:@{@"status": statusDescription}];    
     }
 }
 
