@@ -104,7 +104,7 @@ RCT_EXPORT_METHOD(disconnect)
         p.serverAddress = args[@"domain"];
         p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
         p.username = args[@"username"];
-        p.passwordReference = [keychain persistentRef:args[@"password"]];
+        p.passwordReference = [keychain persistentRef:args[@"vpnpassword"]];
         // p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         // p.identityDataPassword = args[@"clientCertKey"];
 
