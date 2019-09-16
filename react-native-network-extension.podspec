@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     s.requires_arc   = true
     s.platform       = :ios, '9.0'
   
-    s.preserve_paths = 'README.md', 'package.json', 'index.js'
+    s.preserve_paths = '*.js'
     s.source_files   = 'ios/*.{h,m}'
   
     s.dependency 'React'
