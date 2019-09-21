@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		B3E7B58A1CC2AC0600A0062D /* RNNetworkExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNNetworkExtension.m */; };
 		BC9B0CCB23367FBC0067B837 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9B0CCA23367FBC0067B837 /* Keychain.swift */; };
-		BC9B0D03233684E40067B837 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BC9B0CE4233684D10067B837 /* libReact.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -154,7 +153,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC9B0D03233684E40067B837 /* libReact.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
