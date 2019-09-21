@@ -1,6 +1,6 @@
 
 #import "RNNetworkExtension.h"
-#import "RNNetworkExtension-Swift.h"
+#import "RNNetworkExtension-Bridging-Header.h"
 
 #import <NetworkExtension/NEVPNManager.h>
 #import <NetworkExtension/NEVPNConnection.h>
