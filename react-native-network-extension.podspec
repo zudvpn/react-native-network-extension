@@ -18,6 +18,7 @@ Pod::Spec.new do |s|
   
     s.preserve_paths = '*.js'
     s.source_files   = 'ios/*.{h,m}', 'ios/*.swift'
+    s.xcconfig       = { 'SWIFT_OBJC_BRIDGING_HEADER' => 'ios/RNNetworkExtension-Bridging-Header.h' }
   
     s.dependency 'React'
   end
