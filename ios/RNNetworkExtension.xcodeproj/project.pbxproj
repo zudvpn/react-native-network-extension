@@ -146,6 +146,7 @@
 		BC9B0CC923367FBC0067B837 /* RNNetworkExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNNetworkExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		BC9B0CCA23367FBC0067B837 /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		BC9B0CD0233684D10067B837 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		BC9B0D0623368B5E0067B837 /* RNNetworkExtension-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNNetworkExtension-Swift.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +172,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				BC9B0D0623368B5E0067B837 /* RNNetworkExtension-Swift.h */,
 				BC9B0CCA23367FBC0067B837 /* Keychain.swift */,
 				B3E7B5881CC2AC0600A0062D /* RNNetworkExtension.h */,
 				B3E7B5891CC2AC0600A0062D /* RNNetworkExtension.m */,
