@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-class Keychain {
+@objc class Keychain : NSObject {
 	func persistentRef(key: String) -> NSData? {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
@@ -9,7 +9,7 @@ class Keychain {
 			kSecAttrAccount: key as AnyObject,
 			kSecAttrAccessible: kSecAttrAccessibleAlways,
 			kSecMatchLimit: kSecMatchLimitOne,
-			kSecAttrService: Bundle.mainBundle().bundleIdentifier!,
+            kSecAttrService: Bundle.main.bundleIdentifier! as AnyObject,
 			kSecReturnPersistentRef: kCFBooleanTrue
 		]
 		
@@ -25,12 +25,12 @@ class Keychain {
 	func set(key: String, value: String) {
 		
 		let query: [NSObject: AnyObject] = [
-			kSecValueData: value.dataUsingEncoding(NSUTF8StringEncoding)! as AnyObject,
+            kSecValueData: value.data(using: String.Encoding.utf8)! as AnyObject,
 			kSecClass: kSecClassGenericPassword,
-			kSecAttrGeneric: key,
-			kSecAttrAccount: key,
+            kSecAttrGeneric: key as AnyObject,
+            kSecAttrAccount: key as AnyObject,
 			kSecAttrAccessible: kSecAttrAccessibleAlways,
-			kSecAttrService: Bundle.mainBundle().bundleIdentifier!
+            kSecAttrService: Bundle.main.bundleIdentifier! as AnyObject
 		]
 
 		clear(key: key)
