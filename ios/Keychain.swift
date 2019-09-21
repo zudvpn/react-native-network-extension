@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 @objc class Keychain : NSObject {
-	func persistentRef(key: String) -> NSData? {
+	@objc func persistentRef(key: String) -> NSData? {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
 			kSecAttrGeneric: key as AnyObject,
@@ -22,7 +22,7 @@ import Security
 		return secItem as? NSData
 	}
 
-	func set(key: String, value: String) {
+	@objc func set(key: String, value: String) {
 		
 		let query: [NSObject: AnyObject] = [
             kSecValueData: value.data(using: String.Encoding.utf8)! as AnyObject,
@@ -37,7 +37,7 @@ import Security
 		SecItemAdd(query as CFDictionary, nil)
 	}
 
-	func clear(key: String) {
+	@objc func clear(key: String) {
 		let query: [NSObject: AnyObject] = [
 			kSecClass: kSecClassGenericPassword,
 			kSecAttrAccount: key as AnyObject

@@ -1,6 +1,6 @@
 {
   "name": "react-native-network-extension",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "React Native Network Extension",
   "repository": "https://github.com/miniyarov/react-native-network-extension",
   "main": "index.js",
@@ -15,8 +15,10 @@
     "email": "miniyarov@gmail.com"
   },
   "license": "MIT",
+  "devDependencies": {
+    "react-native": "^0.60.5"
+  },
   "peerDependencies": {
-    "react-native": "^0.41.2",
-    "react-native-windows": "0.41.0-rc.1"
+    "react-native": "^0.60.5"
   }
 }

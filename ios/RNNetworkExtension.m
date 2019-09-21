@@ -1,6 +1,6 @@
 
 #import "RNNetworkExtension.h"
-#import "RNNetworkExtension-Bridging-Header.h"
+#import "RNNetworkExtension-Swift.h"
 
 #import <NetworkExtension/NEVPNManager.h>
 #import <NetworkExtension/NEVPNConnection.h>
@@ -97,14 +97,15 @@ RCT_EXPORT_METHOD(disconnect)
         } else {
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
+        
+        Keychain* keychain = [Keychain new];
 
-        Keychain *keychain = [[Keychain alloc] init];
-        [keychain set:@"vpnpassword" value:args[@"password"]];
+        [keychain setWithKey:@"vpnpassword" value:args[@"password"]];
 
         p.serverAddress = args[@"domain"];
         p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
         p.username = args[@"username"];
-        p.passwordReference = [keychain persistentRef:args[@"vpnpassword"]];
+        p.passwordReference = [keychain persistentRefWithKey:args[@"vpnpassword"]];
         // p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         // p.identityDataPassword = args[@"clientCertKey"];
 
