@@ -20,7 +20,7 @@
 
 RCT_EXPORT_MODULE()
 
-- (dispatch_queue_t)methodQueue
+-(dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
 }
@@ -98,7 +98,7 @@ RCT_EXPORT_METHOD(disconnect)
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
 
-        Keychain *keychain = [Keychain new];
+        Keychain *keychain = [[Keychain alloc] init];
         [keychain set:@"vpnpassword" value:args[@"password"]];
 
         p.serverAddress = args[@"domain"];
