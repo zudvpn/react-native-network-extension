@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B3E7B58A1CC2AC0600A0062D /* RNNetworkExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNNetworkExtension.m */; };
-		BC9B0CCB23367FBC0067B837 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9B0CCA23367FBC0067B837 /* Keychain.swift */; };
+		BCBCBF6D2336D606003F3D27 /* KFKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = BCBCBF6C2336D606003F3D27 /* KFKeychain.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -142,10 +142,9 @@
 		134814201AA4EA6300B7C361 /* libRNNetworkExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNNetworkExtension.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5881CC2AC0600A0062D /* RNNetworkExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNNetworkExtension.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNNetworkExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNNetworkExtension.m; sourceTree = "<group>"; };
-		BC9B0CC923367FBC0067B837 /* RNNetworkExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNNetworkExtension-Bridging-Header.h"; sourceTree = "<group>"; };
-		BC9B0CCA23367FBC0067B837 /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		BC9B0CD0233684D10067B837 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
-		BC9B0D0623368B5E0067B837 /* RNNetworkExtension-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNNetworkExtension-Swift.h"; sourceTree = "<group>"; };
+		BCBCBF5B2336D5EF003F3D27 /* KFKeychain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KFKeychain.h; sourceTree = "<group>"; };
+		BCBCBF6C2336D606003F3D27 /* KFKeychain.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KFKeychain.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,12 +169,11 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				BC9B0D0623368B5E0067B837 /* RNNetworkExtension-Swift.h */,
-				BC9B0CCA23367FBC0067B837 /* Keychain.swift */,
+				BCBCBF6C2336D606003F3D27 /* KFKeychain.m */,
+				BCBCBF5B2336D5EF003F3D27 /* KFKeychain.h */,
 				B3E7B5881CC2AC0600A0062D /* RNNetworkExtension.h */,
 				B3E7B5891CC2AC0600A0062D /* RNNetworkExtension.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
-				BC9B0CC923367FBC0067B837 /* RNNetworkExtension-Bridging-Header.h */,
 				BC9B0CCF233684D00067B837 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -390,8 +388,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCBCBF6D2336D606003F3D27 /* KFKeychain.m in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNNetworkExtension.m in Sources */,
-				BC9B0CCB23367FBC0067B837 /* Keychain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,7 +494,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNNetworkExtension;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "RNNetworkExtension-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -517,7 +514,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNNetworkExtension;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "RNNetworkExtension-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
