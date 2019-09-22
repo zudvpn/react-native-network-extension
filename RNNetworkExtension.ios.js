@@ -8,12 +8,16 @@ const NativeRNNetworkExtension = NativeModules.RNNetworkExtension;
 const eventEmitter = new NativeEventEmitter(NativeRNNetworkExtension);
 
 export default {
-    connect(options) {
-        return NativeRNNetworkExtension.connect(options);
+    connect() {
+        return NativeRNNetworkExtension.connect();
     },
 
     disconnect() {
         return NativeRNNetworkExtension.disconnect();
+    },
+
+    configure(options) {
+        return NativeRNNetworkExtension.configure(options);
     },
 
     addEventListener(event, listener) {

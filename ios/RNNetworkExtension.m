@@ -1,6 +1,5 @@
 
 #import "RNNetworkExtension.h"
-#import "KFKeychain.h"
 
 #import <NetworkExtension/NEVPNManager.h>
 #import <NetworkExtension/NEVPNConnection.h>
@@ -25,6 +24,25 @@ RCT_EXPORT_MODULE()
     return dispatch_get_main_queue();
 }
 
++(id)sharedManager {
+    static RNNetworkExtension *sharedManager = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedManager = [[self alloc] init];
+    });
+
+    return sharedManager;
+}
+
+-(id)init
+{
+    if (self = [super init]) {
+        [self bootstrap];
+    }
+
+    return self;
+}
+
 -(void)bootstrap
 {
     self.vpnManager = [NEVPNManager sharedManager];
@@ -43,38 +61,51 @@ RCT_EXPORT_MODULE()
     NSLog(@"RNNetworkExtension bootstrapped");
 }
 
-- (void)startObserving
+-(void)startObserving
 {
     hasListeners = YES;
 }
 
-- (void)stopObserving
+-(void)stopObserving
 {
     hasListeners = NO;
 }
 
-- (NSArray<NSString *> *)supportedEvents
+-(NSArray<NSString *> *)supportedEvents
 {
   return @[@"VPNStatus", @"VPNStartFail"];
 }
 
-RCT_EXPORT_METHOD(connect:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(connect)
 {
-    [self bootstrap];
-
     NSLog(@"connect triggered");
-    [self installProfile:args resolver:resolve rejecter:reject];
 
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self
-           selector:@selector(vpnConfigDidChange:)
-               name:NEVPNConfigurationChangeNotification
-             object:nil];
+    [_vpnManager loadFromPreferencesWithCompletionHandler:^(NSError *error) {
+        if (error) {
+            NSLog(@"vpn load error: %@", error.localizedDescription);
+            
+            return;
+        }
+
+        [self startConnecting];
+    }];
 }
 
 RCT_EXPORT_METHOD(disconnect)
 {
     [_vpnManager.connection stopVPNTunnel];
+}
+
+RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self
+           selector:@selector(vpnConfigDidChange:)
+               name:NEVPNConfigurationChangeNotification
+             object:nil];
+
+    NSLog(@"install triggered");
+    [self installProfile:args resolver:resolve rejecter:reject];
 }
 
 -(void)installProfile:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
@@ -92,18 +123,18 @@ RCT_EXPORT_METHOD(disconnect)
 
         NEVPNProtocolIKEv2 *p = (NEVPNProtocolIKEv2 *)_vpnManager.protocolConfiguration;
 
-        if (p) {
-
-        } else {
+        if (!p) {
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
-        
-        [KFKeychain saveObject:args[@"password"] forKey:@"vpnpassword"];
+
+        NSString *passwordReference = [self addVPNCredentialsToKeychain:args[@"username"] withPassword:args[@"password"]];
+
+        NSLog(@"Password Referenced %@", passwordReference);
 
         p.serverAddress = args[@"domain"];
         p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
         p.username = args[@"username"];
-        p.passwordReference = [KFKeychain loadObjectForKey:@"vpnpassword"];
+        p.passwordReference = passwordReference;
         // p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         // p.identityDataPassword = args[@"clientCertKey"];
 
@@ -150,7 +181,43 @@ RCT_EXPORT_METHOD(disconnect)
     }];
 }
 
-- (void)vpnConfigDidChange:(NSNotification *)notification
+-(NSData*)addVPNCredentialsToKeychain:(NSString*)username withPassword:(NSString*)password
+{
+    NSMutableDictionary *keychainItem = [NSMutableDictionary dictionary];
+
+    NSData *encodedIdentifier = [username dataUsingEncoding:NSUTF8StringEncoding];
+
+    keychainItem[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
+    keychainItem[(__bridge id)kSecAttrDescription] = @"A password used to authenticate on a ZudVPN server";
+    keychainItem[(__bridge id)kSecAttrGeneric] = encodedIdentifier;
+    keychainItem[(__bridge id)kSecAttrAccount] = encodedIdentifier;
+    keychainItem[(__bridge id)kSecAttrService] = [[NSBundle mainBundle] bundleIdentifier];
+    keychainItem[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
+    keychainItem[(__bridge id)kSecReturnPersistentRef] = @YES;
+
+    CFTypeRef typeResult = nil;
+
+    OSStatus sts = SecItemCopyMatching((__bridge CFDictionaryRef)keychainItem, &typeResult);
+
+    NSLog(@"SetItemCopyMatching Error Code: %d", (int)sts);
+
+    if (sts == noErr) {
+        NSData *theReference = (__bridge NSData *)typeResult;
+        return theReference;
+    } else {
+        keychainItem[(__bridge id)kSecValueData] = [password dataUsingEncoding:NSUTF8StringEncoding];
+
+        OSStatus sts = SecItemAdd((__bridge CFDictionaryRef)keychainItem, &typeResult);
+        NSLog(@"SecItemAdd Error Code: %d", (int)sts);
+
+        NSData *theReference = (__bridge NSData *)(typeResult);
+        return theReference;
+    }
+
+    return nil;
+}
+
+-(void)vpnConfigDidChange:(NSNotification *)notification
 {
     // TODO: Save configuration failed
     [self startConnecting];
@@ -160,7 +227,7 @@ RCT_EXPORT_METHOD(disconnect)
                                                   object:nil];
 }
 
-- (void)startConnecting
+-(void)startConnecting
 {
     NSLog(@"start connecting");
     
@@ -176,7 +243,7 @@ RCT_EXPORT_METHOD(disconnect)
     }
 }
 
-- (void)vpnStatusDidChange:(NSNotification *)notification
+-(void)vpnStatusDidChange:(NSNotification *)notification
 {
     NEVPNStatus status = _vpnManager.connection.status;
     NSString *statusDescription = nil;
