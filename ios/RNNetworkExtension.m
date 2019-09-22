@@ -203,7 +203,7 @@ RCT_EXPORT_METHOD(disconnect)
     NSLog(@"VPN status changed %@", statusDescription);
 
     if (hasListeners) {
-        [self sendEventWithName:@"VPNStatus" body:@{@"status": statusDescription}];    
+        [self sendEventWithName:@"VPNStatus" body:statusDescription];
     }
 }
 
