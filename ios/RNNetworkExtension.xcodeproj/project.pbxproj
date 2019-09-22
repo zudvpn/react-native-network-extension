@@ -176,6 +176,7 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 				BC9B0CCF233684D00067B837 /* Frameworks */,
 			);
+			indentWidth = 3;
 			sourceTree = "<group>";
 		};
 		BC9B0CCF233684D00067B837 /* Frameworks */ = {

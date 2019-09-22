@@ -76,18 +76,20 @@ RCT_EXPORT_MODULE()
   return @[@"VPNStatus", @"VPNStartFail"];
 }
 
-RCT_EXPORT_METHOD(connect)
+RCT_EXPORT_METHOD(connect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSLog(@"connect triggered");
 
     [_vpnManager loadFromPreferencesWithCompletionHandler:^(NSError *error) {
         if (error) {
             NSLog(@"vpn load error: %@", error.localizedDescription);
+
+            reject(@"vpn_load_error", @"VPN Manager load error", error);
             
             return;
         }
 
-        [self startConnecting];
+        [self startConnecting:resolve rejecter:reject];
     }];
 }
 
@@ -127,26 +129,28 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBloc
             p = [[NEVPNProtocolIKEv2 alloc] init];
         }
 
-        NSString *passwordReference = [self addVPNCredentialsToKeychain:args[@"username"] withPassword:args[@"password"]];
+        [self addToKeychain:args[@"username"] withPassword:args[@"password"]];
+
+        NSString *passwordReference = [self readFromKeychain:args[@"username"]];
 
         NSLog(@"Password Referenced %@", passwordReference);
 
         p.serverAddress = args[@"domain"];
-        p.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
+        p.authenticationMethod = NEVPNIKEAuthenticationMethodNone;
         p.username = args[@"username"];
         p.passwordReference = passwordReference;
         // p.identityData = [[NSData alloc] initWithBase64EncodedString:args[@"clientCert"] options:0];
         // p.identityDataPassword = args[@"clientCertKey"];
 
-        // p.childSecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
-        // p.childSecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
-        // p.childSecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
-        // p.childSecurityAssociationParameters.lifetimeMinutes = 20;
+        p.childSecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        p.childSecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        p.childSecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        p.childSecurityAssociationParameters.lifetimeMinutes = 20;
 
-        // p.IKESecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
-        // p.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
-        // p.IKESecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
-        // p.IKESecurityAssociationParameters.lifetimeMinutes = 20;
+        p.IKESecurityAssociationParameters.diffieHellmanGroup = NEVPNIKEv2DiffieHellmanGroup19;
+        p.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES128GCM;
+        p.IKESecurityAssociationParameters.integrityAlgorithm = NEVPNIKEv2IntegrityAlgorithmSHA512;
+        p.IKESecurityAssociationParameters.lifetimeMinutes = 20;
         
         p.disableMOBIKE = NO;
         p.disableRedirect = YES;
@@ -154,8 +158,8 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBloc
         p.enablePFS = YES;
         p.useConfigurationAttributeInternalIPSubnet = NO;
         // p.certificateType = NEVPNIKEv2CertificateTypeECDSA256;
-        // p.serverCertificateCommonName = args[@"IPAddress"];
-        // p.serverCertificateIssuerCommonName = args[@"IPAddress"];
+        // p.serverCertificateCommonName = args[@"domain"];
+        // p.serverCertificateIssuerCommonName = args[@"domain"];
 
         p.localIdentifier = args[@"domain"];
         p.remoteIdentifier = args[@"domain"];
@@ -181,53 +185,54 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBloc
     }];
 }
 
--(NSData*)addVPNCredentialsToKeychain:(NSString*)username withPassword:(NSString*)password
+-(NSMutableDictionary *)keychainQueryForKey:(NSString *)key {
+    return [@{(__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+              (__bridge id)kSecAttrGeneric: key,
+              (__bridge id)kSecAttrService: key,
+              (__bridge id)kSecAttrAccount: key,
+              (__bridge id)kSecAttrAccessible: (__bridge id)kSecAttrAccessibleAlways
+              } mutableCopy];
+}
+
+-(void)addToKeychain:(NSString*)username withPassword:(NSString*)password
 {
-    NSMutableDictionary *keychainItem = [NSMutableDictionary dictionary];
+    OSStatus sts = SecItemDelete((__bridge CFDictionaryRef)[self keychainQueryForKey:username]);
+    NSLog(@"SecItemDelete Error Code: %d", (int)sts);
 
-    NSData *encodedIdentifier = [username dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableDictionary *keychainQuery = [self keychainQueryForKey:username];
 
-    keychainItem[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
-    keychainItem[(__bridge id)kSecAttrDescription] = @"A password used to authenticate on a ZudVPN server";
-    keychainItem[(__bridge id)kSecAttrGeneric] = encodedIdentifier;
-    keychainItem[(__bridge id)kSecAttrAccount] = encodedIdentifier;
-    keychainItem[(__bridge id)kSecAttrService] = [[NSBundle mainBundle] bundleIdentifier];
-    keychainItem[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
-    keychainItem[(__bridge id)kSecReturnPersistentRef] = @YES;
+    [keychainQuery setObject:[password dataUsingEncoding:NSUTF8StringEncoding] forKey:(__bridge id)kSecValueData];
 
-    CFTypeRef typeResult = nil;
+    sts = SecItemAdd((__bridge CFDictionaryRef)keychainQuery, nil);
+    NSLog(@"SecItemAdd Error Code: %d", (int)sts);
+}
 
-    OSStatus sts = SecItemCopyMatching((__bridge CFDictionaryRef)keychainItem, &typeResult);
+-(NSData*)readFromKeychain:(NSString*)username
+{
+    NSMutableDictionary *keychainQuery = [self keychainQueryForKey:username];
+    [keychainQuery setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnPersistentRef];
+    [keychainQuery setObject:(__bridge id)kSecMatchLimitOne forKey:(__bridge id)kSecMatchLimit];
 
-    NSLog(@"SetItemCopyMatching Error Code: %d", (int)sts);
+    CFTypeRef keyData = NULL;
 
-    if (sts == noErr) {
-        NSData *theReference = (__bridge NSData *)typeResult;
-        return theReference;
-    } else {
-        keychainItem[(__bridge id)kSecValueData] = [password dataUsingEncoding:NSUTF8StringEncoding];
+    OSStatus sts = SecItemCopyMatching((__bridge CFDictionaryRef)keychainQuery, &keyData);
 
-        OSStatus sts = SecItemAdd((__bridge CFDictionaryRef)keychainItem, &typeResult);
-        NSLog(@"SecItemAdd Error Code: %d", (int)sts);
+    NSLog(@"SecItemCopyMatching Error Code: %d", (int)sts);
 
-        NSData *theReference = (__bridge NSData *)(typeResult);
-        return theReference;
-    }
-
-    return nil;
+    return (__bridge NSData *)keyData;
 }
 
 -(void)vpnConfigDidChange:(NSNotification *)notification
 {
     // TODO: Save configuration failed
-    [self startConnecting];
+    [self startConnecting:nil rejecter:nil];
 
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NEVPNConfigurationChangeNotification
                                                   object:nil];
 }
 
--(void)startConnecting
+-(void)startConnecting:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     NSLog(@"start connecting");
     
@@ -240,6 +245,16 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBloc
         }
         
         NSLog(@"Start VPN failed: [%@]", error.localizedDescription);
+
+        if (reject) {
+            reject(@"vpn_start_error", @"VPN Manager start error", error);
+        }
+
+        return;
+    }
+
+    if (resolve) {
+        resolve(@YES);
     }
 }
 
