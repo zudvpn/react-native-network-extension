@@ -98,6 +98,23 @@ RCT_EXPORT_METHOD(disconnect)
     [_vpnManager.connection stopVPNTunnel];
 }
 
+RCT_EXPORT_METHOD(remove:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSLog(@"removing vpn profile");
+
+    [_vpnManager removeFromPreferencesWithCompletionHandler:^(NSError *error) {
+        if (error) {
+            NSLog(@"vpn remove error: %@", error.localizedDescription);
+
+            reject(@"vpn_remove_error", @"VPN Manager remove error", error);
+
+            return;
+        }
+
+        resolve(@YES);
+    }];
+}
+
 RCT_EXPORT_METHOD(configure:(NSDictionary *)args resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];

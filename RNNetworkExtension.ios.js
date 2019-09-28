@@ -16,6 +16,10 @@ export default {
         return NativeRNNetworkExtension.disconnect();
     },
 
+    remove() {
+        return NativeRNNetworkExtension.remove();
+    },
+
     configure(options) {
         return NativeRNNetworkExtension.configure(options);
     },

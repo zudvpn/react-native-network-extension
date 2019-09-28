@@ -9,6 +9,10 @@ export default {
         return Promise.reject(new Error('RNNetworkExtension is unavailable on Android'));
     },
 
+    remove() {
+        return Promise.reject(new Error('RNNetworkExtension is unavailable on Android'));
+    },
+
     configure(options) {
         return Promise.reject(new Error('RNNetworkExtension is unavailable on Android'));
     },
